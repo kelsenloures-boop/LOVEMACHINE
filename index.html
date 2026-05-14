@@ -415,7 +415,7 @@ async function searchMusic() {
         </div>
       `).join('');
     } else { div.innerHTML = '<div style="padding:1rem">😔 Nenhum resultado</div>'; }
-  } catch(e) { div.innerHTML = '<div style="padding:1rem">❌ Erro</div>'; }
+  } catch(e) { div.innerHTML = '<div style="padding:1rem">❌ Erro na pesquisa</div>'; }
 }
 
 function escapeString(str) { return str.replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
@@ -444,26 +444,28 @@ function generateCode() {
   return code;
 }
 
-// SALVAR NO SHEET.BEST (NA NUVEM)
+// SALVAR NO SHEET.BEST (NA NUVEM) - VERSÃO CORRIGIDA
 async function saveToCloud(code, giftData) {
   try {
-    // Primeiro, verificar se o código já existe
-    const checkResponse = await fetch(`${SHEET_BEST_URL}/codigo/${code}`);
-    const existing = await checkResponse.json();
+    // Primeiro, verificar se o código já existe usando o endpoint correto
+    const searchResponse = await fetch(`${SHEET_BEST_URL}?codigo=${code}`);
+    const existing = await searchResponse.json();
     
     if(existing && existing.length > 0) {
-      // Atualizar existente
-      const response = await fetch(`${SHEET_BEST_URL}/codigo/${code}`, {
+      // Atualizar via PUT com o ID da linha
+      const rowId = existing[0].id;
+      const updateResponse = await fetch(`${SHEET_BEST_URL}/${rowId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          codigo: code,
           dados: JSON.stringify(giftData),
           criado_em: new Date().toISOString()
         })
       });
-      return response.ok;
+      return updateResponse.ok;
     } else {
-      // Criar novo
+      // Criar novo registro
       const response = await fetch(SHEET_BEST_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -473,7 +475,13 @@ async function saveToCloud(code, giftData) {
           criado_em: new Date().toISOString()
         }])
       });
-      return response.ok;
+      
+      if(!response.ok) {
+        const errorText = await response.text();
+        console.error('Erro sheet.best:', errorText);
+        return false;
+      }
+      return true;
     }
   } catch(e) {
     console.error('Erro ao salvar:', e);
@@ -484,7 +492,7 @@ async function saveToCloud(code, giftData) {
 // BUSCAR DO SHEET.BEST
 async function loadFromCloud(code) {
   try {
-    const response = await fetch(`${SHEET_BEST_URL}/codigo/${code}`);
+    const response = await fetch(`${SHEET_BEST_URL}?codigo=${code}`);
     if(!response.ok) return null;
     const data = await response.json();
     if(data && data.length > 0 && data[0].dados) {
@@ -607,7 +615,7 @@ function openGift() {
     window._audio = new Audio(data.music.preview);
     window._audio.loop = true;
     window._audio.volume = 0.4;
-    window._audio.play().catch(e=>console.log('auto-play'));
+    window._audio.play().catch(e=>console.log('auto-play bloqueado'));
   }
   goToPage(6);
 }
