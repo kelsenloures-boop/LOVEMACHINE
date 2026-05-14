@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Presente com Amor 💌</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --rose:#c9707a;
+  --rose-light:#f5e6e8;
+  --rose-dark:#8b3a42;
+  --gold:#c9a96e;
+  --gold-light:#f5eed8;
+  --cream:#fdf8f0;
+  --dark:#1a1015;
+  --mid:#5a3d45;
+  --text:#2d1a20;
+  --white:#ffffff;
+}
+html,body{height:100%;background:var(--cream);font-family:'Jost',sans-serif;color:var(--text);overflow-x:hidden}
+
+/* PÁGINAS */
+.page{display:none;min-height:100vh;position:relative}
+.page.active{display:flex;flex-direction:column}
+
+/* ===== PÁGINA 1 - LANDING ===== */
+#page1{
+  background:linear-gradient(135deg,#1a1015 0%,#3d1f28 40%,#1a1015 100%);
+  align-items:center;justify-content:center;text-align:center;overflow:hidden;
+}
+#page1::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 30% 50%,rgba(201,112,122,0.15) 0%,transparent 60%),
+             radial-gradient(ellipse at 70% 50%,rgba(201,169,110,0.1) 0%,transparent 60%);
+}
+.petals-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.petal{position:absolute;opacity:0;animation:fall linear infinite}
+@keyframes fall{
+  0%{transform:translateY(-20px) rotate(0deg);opacity:0}
+  10%{opacity:.6}
+  90%{opacity:.3}
+  100%{transform:translateY(110vh) rotate(360deg);opacity:0}
+}
+.landing-content{position:relative;z-index:2;max-width:600px;padding:3rem 2rem}
+.landing-badge{
+  display:inline-block;
+  font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--gold);border:1px solid rgba(201,169,110,.4);padding:.5rem 1.5rem;
+  border-radius:50px;margin-bottom:2.5rem;
+}
+.landing-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(3.5rem,8vw,6rem);font-weight:300;line-height:1.05;
+  color:#fff;margin-bottom:1.5rem;
+}
+.landing-title em{color:var(--rose);font-style:italic}
+.landing-sub{
+  font-size:1rem;font-weight:200;color:rgba(255,255,255,.6);
+  line-height:1.8;max-width:420px;margin:0 auto 3rem;letter-spacing:.03em;
+}
+.btn-primary{
+  display:inline-block;
+  background:linear-gradient(135deg,var(--rose),var(--rose-dark));
+  color:#fff;font-family:'Jost',sans-serif;font-size:.85rem;font-weight:400;
+  letter-spacing:.15em;text-transform:uppercase;text-decoration:none;
+  padding:1.1rem 3rem;border-radius:50px;border:none;cursor:pointer;
+  transition:all .3s;position:relative;overflow:hidden;
+}
+.btn-primary::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.1);opacity:0;transition:.3s}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 20px 40px rgba(201,112,122,.4)}
+.btn-primary:hover::after{opacity:1}
+.divider-line{width:80px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:3rem auto}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;margin-top:.5rem}
+.feature{text-align:center}
+.feature-icon{font-size:1.8rem;margin-bottom:.8rem}
+.feature-text{font-size:.78rem;color:rgba(255,255,255,.4);letter-spacing:.05em;line-height:1.6}
+
+/* ===== PÁGINA 2 - FORM INFO ===== */
+#page2{background:var(--cream);justify-content:center;align-items:center;padding:2rem}
+.form-card{
+  background:#fff;border-radius:24px;padding:3.5rem 3rem;
+  max-width:480px;width:100%;
+  box-shadow:0 40px 80px rgba(90,61,69,.08),0 2px 8px rgba(90,61,69,.04);
+}
+.form-card-header{text-align:center;margin-bottom:2.5rem}
+.step-tag{font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;color:var(--rose);font-weight:500;margin-bottom:1rem;display:block}
+.form-title{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:400;color:var(--dark);line-height:1.2;margin-bottom:.6rem}
+.form-desc{font-size:.85rem;color:#9a7e84;line-height:1.7}
+.form-group{margin-bottom:1.5rem}
+.form-label{display:block;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);margin-bottom:.6rem;font-weight:500}
+.form-label span{font-size:.7rem;color:#b8a0a6;margin-left:.3rem;text-transform:none;letter-spacing:0}
+.form-input{
+  width:100%;padding:.9rem 1.2rem;border:1.5px solid #ede5e7;border-radius:12px;
+  font-family:'Jost',sans-serif;font-size:.95rem;color:var(--text);background:#fff;
+  transition:all .25s;outline:none;
+}
+.form-input:focus{border-color:var(--rose);box-shadow:0 0 0 4px rgba(201,112,122,.08)}
+.form-input::placeholder{color:#c8b0b6}
+.btn-next{
+  width:100%;padding:1rem;border-radius:12px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--rose),var(--rose-dark));
+  color:#fff;font-family:'Jost',sans-serif;font-size:.85rem;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;transition:all .3s;margin-top:.5rem;
+}
+.btn-next:hover{transform:translateY(-1px);box-shadow:0 12px 30px rgba(201,112,122,.35)}
+.back-btn{
+  background:none;border:none;cursor:pointer;color:#b8a0a6;font-family:'Jost',sans-serif;
+  font-size:.8rem;display:flex;align-items:center;gap:.5rem;padding:.5rem 0;margin-bottom:1.5rem;transition:.2s;
+}
+.back-btn:hover{color:var(--rose)}
+
+/* ===== PÁGINA 3 - CONTEÚDO ===== */
+#page3{background:var(--cream);padding:2rem;min-height:100vh}
+.content-container{max-width:700px;margin:0 auto}
+.section-header{text-align:center;padding:2rem 0 1.5rem;margin-bottom:2rem;border-bottom:1px solid #ede5e7}
+.section-header .step-tag{display:block;margin-bottom:.5rem}
+.section-header .form-title{font-size:2rem}
+
+.upload-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;
+  margin-bottom:.8rem;
+}
+.upload-cell{
+  aspect-ratio:1;border-radius:12px;border:1.5px dashed #d4bcc1;background:#faf5f6;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;overflow:hidden;transition:.25s;
+}
+.upload-cell:hover{border-color:var(--rose);background:var(--rose-light)}
+.upload-cell img{width:100%;height:100%;object-fit:cover;border-radius:10px}
+.upload-cell .remove-img{
+  position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;
+  background:rgba(26,16,21,.7);border:none;cursor:pointer;color:#fff;font-size:14px;
+  display:none;align-items:center;justify-content:center;line-height:1;
+}
+.upload-cell:hover .remove-img{display:flex}
+.upload-plus{font-size:1.5rem;color:#c8b0b6}
+.upload-count{font-size:.75rem;color:#9a7e84;text-align:right;margin-bottom:1.5rem}
+.section-label{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);font-weight:500;margin-bottom:.8rem;display:block}
+
+.msg-area{
+  width:100%;min-height:140px;padding:1rem 1.2rem;border:1.5px solid #ede5e7;border-radius:12px;
+  font-family:'Jost',sans-serif;font-size:.95rem;color:var(--text);resize:vertical;outline:none;transition:.25s;
+}
+.msg-area:focus{border-color:var(--rose);box-shadow:0 0 0 4px rgba(201,112,122,.08)}
+.ai-btn{
+  display:inline-flex;align-items:center;gap:.5rem;padding:.6rem 1.2rem;
+  background:linear-gradient(135deg,#f0e6f6,#fce8ed);border:1px solid rgba(201,112,122,.25);
+  border-radius:50px;font-family:'Jost',sans-serif;font-size:.78rem;color:var(--rose-dark);
+  cursor:pointer;transition:.25s;margin-top:.7rem;
+}
+.ai-btn:hover{box-shadow:0 4px 16px rgba(201,112,122,.2);transform:translateY(-1px)}
+.ai-btn.loading{opacity:.6;pointer-events:none}
+.ai-sparkle{font-size:1rem}
+
+/* MUSIC SEARCH */
+.music-section{margin-top:2rem}
+.music-search-row{display:flex;gap:.6rem;margin-bottom:.8rem}
+.music-search-row .form-input{margin:0}
+.btn-search-music{
+  padding:.9rem 1.4rem;border-radius:12px;border:none;cursor:pointer;
+  background:var(--dark);color:#fff;font-family:'Jost',sans-serif;font-size:.8rem;
+  white-space:nowrap;transition:.25s;
+}
+.btn-search-music:hover{background:var(--mid)}
+.music-results{max-height:260px;overflow-y:auto;border:1.5px solid #ede5e7;border-radius:12px;display:none}
+.music-result-item{
+  display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;cursor:pointer;
+  transition:.2s;border-bottom:1px solid #f5eef0;
+}
+.music-result-item:last-child{border-bottom:none}
+.music-result-item:hover{background:var(--rose-light)}
+.music-result-item.selected{background:var(--rose-light);border-left:3px solid var(--rose)}
+.music-thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;background:#ede5e7}
+.music-info{flex:1;min-width:0}
+.music-name{font-size:.88rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.music-artist{font-size:.75rem;color:#9a7e84;margin-top:2px}
+.music-play-btn{
+  width:34px;height:34px;border-radius:50%;border:1.5px solid var(--rose);background:none;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  color:var(--rose);font-size:1rem;transition:.2s;
+}
+.music-play-btn:hover{background:var(--rose);color:#fff}
+.selected-music-display{
+  display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;
+  background:linear-gradient(135deg,var(--rose-light),#f5f0fa);
+  border-radius:12px;border:1px solid rgba(201,112,122,.2);margin-top:.8rem;
+}
+.selected-music-display .music-thumb{width:50px;height:50px}
+.selected-music-display .music-info .music-name{font-size:.9rem}
+.selected-tag{font-size:.65rem;color:var(--rose);letter-spacing:.1em;text-transform:uppercase;font-weight:600;margin-bottom:2px}
+
+.btn-conclude{
+  width:100%;padding:1.1rem;border-radius:12px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--rose),var(--rose-dark));
+  color:#fff;font-family:'Jost',sans-serif;font-size:.9rem;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;transition:all .3s;margin-top:2.5rem;margin-bottom:3rem;
+}
+.btn-conclude:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(201,112,122,.4)}
+
+/* ===== PÁGINA 4 - LINK GERADO ===== */
+#page4{background:var(--cream);justify-content:center;align-items:center;padding:2rem;text-align:center}
+.success-card{
+  background:#fff;border-radius:24px;padding:3.5rem 2.5rem;max-width:520px;width:100%;
+  box-shadow:0 40px 80px rgba(90,61,69,.08);
+}
+.success-icon{font-size:3.5rem;margin-bottom:1.5rem;display:block}
+.success-card .form-title{font-size:1.8rem;margin-bottom:.8rem}
+.success-desc{font-size:.9rem;color:#9a7e84;line-height:1.8;margin-bottom:2rem}
+.link-box{
+  background:var(--cream);border-radius:12px;padding:1rem 1.2rem;
+  font-size:.8rem;color:var(--mid);word-break:break-all;border:1px solid #ede5e7;
+  margin-bottom:1rem;text-align:left;
+}
+.btn-copy{
+  width:100%;padding:.9rem;border-radius:12px;border:1.5px solid var(--rose);
+  background:none;color:var(--rose);font-family:'Jost',sans-serif;font-size:.82rem;
+  font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:.25s;
+  margin-bottom:.8rem;
+}
+.btn-copy:hover{background:var(--rose);color:#fff}
+.qr-container{margin:1.5rem 0;display:flex;justify-content:center}
+#qr-canvas{border-radius:12px}
+.share-note{font-size:.78rem;color:#b8a0a6;line-height:1.7}
+
+/* ===== PÁGINA 5 - ENVELOPE PRESENTEADO ===== */
+#page5{
+  background:linear-gradient(135deg,#1a1015 0%,#3d1f28 50%,#1a1015 100%);
+  align-items:center;justify-content:center;text-align:center;overflow:hidden;
+}
+#page5::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at center,rgba(201,112,122,.12) 0%,transparent 70%);
+}
+.envelope-content{position:relative;z-index:2;max-width:480px;padding:2rem}
+.sender-name{font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem}
+.envelope-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,7vw,4.5rem);font-weight:300;color:#fff;line-height:1.1;margin-bottom:.8rem}
+.envelope-title em{color:var(--rose);font-style:italic}
+.envelope-sub{font-size:.9rem;color:rgba(255,255,255,.5);margin-bottom:3rem;line-height:1.7}
+.btn-open{
+  display:inline-block;
+  background:none;border:1.5px solid rgba(201,112,122,.6);color:var(--rose);
+  font-family:'Jost',sans-serif;font-size:.82rem;letter-spacing:.2em;text-transform:uppercase;
+  padding:1rem 3rem;border-radius:50px;cursor:pointer;transition:all .4s;
+}
+.btn-open:hover{background:var(--rose);color:#fff;border-color:var(--rose);transform:scale(1.04)}
+.floating-hearts{position:absolute;inset:0;pointer-events:none}
+.fheart{position:absolute;font-size:1.2rem;animation:floatHeart 4s ease-in-out infinite;opacity:0}
+@keyframes floatHeart{
+  0%{transform:translateY(0) scale(.8);opacity:0}
+  20%{opacity:.5}
+  100%{transform:translateY(-120px) scale(1.2);opacity:0}
+}
+
+/* ===== PÁGINA 6 - PRESENTE ABERTO ===== */
+#page6{
+  background:linear-gradient(160deg,#1a1015 0%,#2d1a20 100%);
+  overflow-y:auto;
+}
+.gift-header{
+  text-align:center;padding:4rem 2rem 2rem;position:relative;
+}
+.gift-header::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--rose),transparent)}
+.gift-greeting{font-size:.75rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:.8rem}
+.gift-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,6vw,3.5rem);font-weight:300;color:#fff;line-height:1.15;margin-bottom:.5rem}
+.gift-title em{color:var(--rose);font-style:italic}
+
+/* MUSIC PLAYER */
+.player-bar{
+  background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.08);
+  border-bottom:1px solid rgba(255,255,255,.08);padding:1.2rem 2rem;
+  display:flex;align-items:center;gap:1.2rem;position:sticky;top:0;z-index:10;backdrop-filter:blur(10px);
+}
+.player-thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;background:#3d1f28}
+.player-info{flex:1;min-width:0}
+.player-track{font-size:.85rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:400}
+.player-artist{font-size:.72rem;color:rgba(255,255,255,.4);margin-top:1px}
+.play-pause-btn{
+  width:42px;height:42px;border-radius:50%;background:var(--rose);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:1rem;color:#fff;transition:.25s;flex-shrink:0;
+}
+.play-pause-btn:hover{background:var(--rose-dark);transform:scale(1.05)}
+.volume-btn{
+  background:none;border:none;cursor:pointer;color:rgba(255,255,255,.4);font-size:1.1rem;padding:.3rem;
+  flex-shrink:0;transition:.2s;
+}
+.volume-btn:hover{color:rgba(255,255,255,.8)}
+
+/* MENSAGEM */
+.message-section{padding:3rem 2rem;max-width:640px;margin:0 auto;text-align:center}
+.msg-label{font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:1.5rem}
+.msg-divider{display:flex;align-items:center;gap:1rem;margin-bottom:2rem}
+.msg-divider::before,.msg-divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent)}
+.msg-divider span{color:var(--rose);font-size:1rem}
+.gift-message{
+  font-family:'Cormorant Garamond',serif;font-size:clamp(1.1rem,2.5vw,1.5rem);
+  font-weight:300;color:rgba(255,255,255,.85);line-height:1.9;font-style:italic;
+}
+
+/* GALERIA */
+.gallery-section{padding:2rem 1.5rem 4rem;max-width:700px;margin:0 auto}
+.gallery-label{font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.3);text-align:center;margin-bottom:1.5rem}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.photo-item{border-radius:12px;overflow:hidden;aspect-ratio:1;cursor:pointer;transition:.3s}
+.photo-item:hover{transform:scale(1.02);z-index:1;box-shadow:0 20px 40px rgba(0,0,0,.5)}
+.photo-item img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-item:nth-child(3n+1){grid-row:span 1}
+.photo-item:first-child{grid-column:span 2;grid-row:span 2}
+
+/* LIGHTBOX */
+.lightbox{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:100;
+  align-items:center;justify-content:center;
+}
+.lightbox.open{display:flex}
+.lightbox img{max-width:90vw;max-height:90vh;object-fit:contain;border-radius:8px}
+.lightbox-close{position:absolute;top:1.5rem;right:1.5rem;background:rgba(255,255,255,.1);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:1.2rem;cursor:pointer}
+
+/* ANIMAÇÕES DE ENTRADA */
+.fade-in{animation:fadeIn .8s ease forwards}
+.fade-up{animation:fadeUp .7s ease forwards;opacity:0}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.delay-1{animation-delay:.15s}
+.delay-2{animation-delay:.3s}
+.delay-3{animation-delay:.45s}
+.delay-4{animation-delay:.6s}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--dark);color:#fff;font-family:'Jost',sans-serif;font-size:.82rem;
+  padding:.8rem 1.8rem;border-radius:50px;opacity:0;transition:.3s;z-index:999;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* LOADING OVERLAY */
+.loading-overlay{
+  position:fixed;inset:0;background:rgba(26,16,21,.85);z-index:200;
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:1.5rem;
+}
+.loading-overlay.active{display:flex}
+.loader{
+  width:48px;height:48px;border:2px solid rgba(201,112,122,.2);
+  border-top-color:var(--rose);border-radius:50%;animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{color:rgba(255,255,255,.7);font-size:.85rem;letter-spacing:.05em}
+
+@media(max-width:480px){
+  .features{grid-template-columns:1fr;gap:1.2rem}
+  .form-card{padding:2.5rem 1.5rem}
+  .photo-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+  .photo-item:first-child{grid-column:span 1;grid-row:span 1}
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading">
+  <div class="loader"></div>
+  <p class="loading-text" id="loading-text">A criar magia...</p>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <img id="lightbox-img" src="" alt="">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+</div>
+
+<!-- ===== PÁGINA 1 - LANDING ===== -->
+<div class="page active" id="page1">
+  <div class="petals-bg" id="petals"></div>
+  <div class="landing-content fade-in">
+    <span class="landing-badge">✦ Uma surpresa especial ✦</span>
+    <h1 class="landing-title">
+      Presenteia<br>quem <em>amas</em>
+    </h1>
+    <p class="landing-sub">
+      Cria um presente digital inesquecível com fotos, uma mensagem do coração e a vossa música. Um link mágico para entregar ao amor da tua vida.
+    </p>
+    <button class="btn-primary" onclick="goToPage(2)">
+      💌 Presentear o meu amor
+    </button>
+    <div class="divider-line"></div>
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">📸</div>
+        <div class="feature-text">Até 18 fotos dos vossos momentos</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🎵</div>
+        <div class="feature-text">A vossa música a tocar de fundo</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">💝</div>
+        <div class="feature-text">Um link especial só para ela</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PÁGINA 2 - FORM INFO ===== -->
+<div class="page" id="page2">
+  <div style="display:flex;justify-content:center;align-items:center;min-height:100vh;padding:2rem;background:var(--cream)">
+    <div class="form-card fade-in">
+      <div class="form-card-header">
+        <span class="step-tag">Passo 1 de 2</span>
+        <h2 class="form-title">Sobre vocês</h2>
+        <p class="form-desc">Conta-nos um pouco da vossa história para tornar este presente ainda mais especial.</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">O teu nome</label>
+        <input type="text" class="form-input" id="sender-name" placeholder="Como te chamas?" maxlength="60">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nome de quem vais presentear</label>
+        <input type="text" class="form-input" id="receiver-name" placeholder="O nome dela..." maxlength="60">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Quando começou o vosso amor <span>(opcional)</span></label>
+        <input type="date" class="form-input" id="start-date">
+      </div>
+      <button class="btn-next" onclick="goToStep3()">Seguinte →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PÁGINA 3 - CONTEÚDO ===== -->
+<div class="page" id="page3">
+  <div class="content-container">
+    <div class="section-header fade-in">
+      <span class="step-tag">Passo 2 de 2</span>
+      <h2 class="form-title">Cria o teu presente</h2>
+    </div>
+
+    <!-- FOTOS -->
+    <div style="background:#fff;border-radius:20px;padding:2rem;margin-bottom:1.2rem;box-shadow:0 4px 24px rgba(90,61,69,.06)">
+      <label class="section-label">📸 As vossas fotos <span style="color:#b8a0a6;font-size:.7rem;text-transform:none;letter-spacing:0">(até 18 fotos)</span></label>
+      <div class="upload-grid" id="upload-grid"></div>
+      <p class="upload-count"><span id="photo-count">0</span>/18 fotos adicionadas</p>
+      <input type="file" id="file-input" accept="image/*" multiple style="display:none" onchange="handleFiles(this.files)">
+    </div>
+
+    <!-- MENSAGEM -->
+    <div style="background:#fff;border-radius:20px;padding:2rem;margin-bottom:1.2rem;box-shadow:0 4px 24px rgba(90,61,69,.06)">
+      <label class="section-label">💌 A tua mensagem</label>
+      <textarea class="msg-area" id="message" placeholder="Escreve algo do coração para ela..."></textarea>
+      <button class="ai-btn" id="ai-btn" onclick="generateAIMessage()">
+        <span class="ai-sparkle">✨</span>
+        Gerar mensagem com IA
+      </button>
+    </div>
+
+    <!-- MÚSICA -->
+    <div style="background:#fff;border-radius:20px;padding:2rem;margin-bottom:1.2rem;box-shadow:0 4px 24px rgba(90,61,69,.06)">
+      <label class="section-label">🎵 A vossa música</label>
+      <div class="music-search-row">
+        <input type="text" class="form-input" id="music-search" placeholder="Pesquisa por artista ou música..." onkeyup="onSearchTyping()" onkeypress="if(event.key==='Enter')searchMusic()">
+        <button class="btn-search-music" onclick="searchMusic()">Pesquisar</button>
+      </div>
+      <div class="music-results" id="music-results"></div>
+      <div id="selected-music-display" style="display:none"></div>
+    </div>
+
+    <button class="btn-conclude" onclick="conclude()">✓ Concluir e gerar presente</button>
+  </div>
+</div>
+
+<!-- ===== PÁGINA 4 - LINK GERADO ===== -->
+<div class="page" id="page4">
+  <div class="success-card fade-in">
+    <span class="success-icon">🎁</span>
+    <h2 class="form-title">Presente criado!</h2>
+    <p class="success-desc">O teu presente está pronto. Partilha o link abaixo com <strong id="receiver-display"></strong> e espera pela reação dela. 💕</p>
+    <div class="link-box" id="gift-link-display"></div>
+    <button class="btn-copy" onclick="copyLink()">📋 Copiar link</button>
+    <div class="qr-container">
+      <canvas id="qr-canvas"></canvas>
+    </div>
+    <p class="share-note">Podes também guardar o QR Code acima e enviar por mensagem. Quando ela o ler, vai encontrar uma surpresa inesquecível. 🌹</p>
+    <button class="btn-next" onclick="previewGift()" style="margin-top:1.5rem;border-radius:12px">👀 Pré-visualizar o presente</button>
+  </div>
+</div>
+
+<!-- ===== PÁGINA 5 - ENVELOPE (RECEBIDO) ===== -->
+<div class="page" id="page5">
+  <div class="floating-hearts" id="floating-hearts"></div>
+  <div class="petals-bg" id="petals5"></div>
+  <div class="envelope-content">
+    <p class="sender-name" id="p5-sender">De ...</p>
+    <h1 class="envelope-title" id="p5-title">Tens um <em>presente</em></h1>
+    <p class="envelope-sub" id="p5-sub">Alguém especial preparou algo para ti com muito amor. Clica para abrir a surpresa.</p>
+    <button class="btn-open" onclick="openGift()">✦ Abrir o meu presente ✦</button>
+  </div>
+</div>
+
+<!-- ===== PÁGINA 6 - PRESENTE ABERTO ===== -->
+<div class="page" id="page6">
+  <!-- AUDIO PLAYER -->
+  <div class="player-bar" id="player-bar" style="display:none">
+    <img class="player-thumb" id="player-thumb" src="" alt="">
+    <div class="player-info">
+      <div class="player-track" id="player-track">—</div>
+      <div class="player-artist" id="player-artist">—</div>
+    </div>
+    <button class="volume-btn" onclick="toggleMute()" title="Mudo">🔊</button>
+    <button class="play-pause-btn" id="play-pause-btn" onclick="togglePlay()">⏸</button>
+  </div>
+
+  <!-- HEADER -->
+  <div class="gift-header">
+    <p class="gift-greeting" id="g-greeting">Uma mensagem especial para ti</p>
+    <h1 class="gift-title" id="g-title">Com <em>amor</em>, para ti</h1>
+  </div>
+
+  <!-- MENSAGEM -->
+  <div class="message-section">
+    <p class="msg-label">A mensagem</p>
+    <div class="msg-divider"><span>🌹</span></div>
+    <p class="gift-message" id="g-message"></p>
+  </div>
+
+  <!-- GALERIA -->
+  <div class="gallery-section">
+    <p class="gallery-label">Os nossos momentos</p>
+    <div class="photo-grid" id="g-photos"></div>
+  </div>
+</div>
+
+<!-- QRCode lib -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+// ===== ESTADO GLOBAL =====
+const state = {
+  sender: '', receiver: '', startDate: '',
+  photos: [], message: '', music: null, giftId: null
+};
+
+// ===== NAVEGAÇÃO =====
+function goToPage(n) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page'+n).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goToStep3() {
+  state.sender = document.getElementById('sender-name').value.trim();
+  state.receiver = document.getElementById('receiver-name').value.trim();
+  state.startDate = document.getElementById('start-date').value;
+  if(!state.sender){showToast('Escreve o teu nome 💕');return}
+  if(!state.receiver){showToast('Escreve o nome dela 💕');return}
+  buildUploadGrid();
+  goToPage(3);
+}
+
+// ===== PETALS =====
+function createPetals(containerId) {
+  const c = document.getElementById(containerId);
+  if(!c)return;
+  const symbols = ['🌸','🌺','✿','❀','🌹'];
+  for(let i=0;i<18;i++){
+    const p = document.createElement('div');
+    p.className='petal';
+    p.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+    p.style.cssText = `left:${Math.random()*100}%;font-size:${10+Math.random()*14}px;animation-duration:${6+Math.random()*8}s;animation-delay:${Math.random()*6}s`;
+    c.appendChild(p);
+  }
+}
+createPetals('petals');
+
+// ===== UPLOAD FOTOS =====
+function buildUploadGrid() {
+  const grid = document.getElementById('upload-grid');
+  grid.innerHTML = '';
+  for(let i=0;i<18;i++) {
+    const cell = document.createElement('div');
+    cell.className = 'upload-cell';
+    cell.dataset.index = i;
+    if(state.photos[i]) {
+      cell.innerHTML = `<img src="${state.photos[i].url}" alt=""><button class="remove-img" onclick="removePhoto(event,${i})">✕</button>`;
+    } else {
+      cell.innerHTML = `<span class="upload-plus">+</span>`;
+    }
+    cell.onclick = () => { document.getElementById('file-input').click(); };
+    grid.appendChild(cell);
+  }
+  document.getElementById('photo-count').textContent = state.photos.filter(Boolean).length;
+}
+
+function handleFiles(files) {
+  const remaining = 18 - state.photos.filter(Boolean).length;
+  const arr = Array.from(files).slice(0,remaining);
+  let done = 0;
+  arr.forEach(file => {
+    if(!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      state.photos.push({url: e.target.result, name: file.name});
+      done++;
+      if(done===arr.length) buildUploadGrid();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removePhoto(e, idx) {
+  e.stopPropagation();
+  state.photos.splice(idx,1);
+  buildUploadGrid();
+}
+
+// ===== MENSAGEM "FALSA IA" =====
+function generateAIMessage() {
+  const btn = document.getElementById('ai-btn');
+  btn.classList.add('loading');
+  
+  setTimeout(() => {
+    const sender = state.sender || 'quem te ama';
+    const receiver = state.receiver || 'meu amor';
+    let dateInfo = '';
+    if(state.startDate) {
+      try {
+        const date = new Date(state.startDate);
+        dateInfo = ` Desde ${date.toLocaleDateString('pt-PT', {day:'numeric', month:'long', year:'numeric'})} que o meu coração bate mais forte por ti.`;
+      } catch(e) { dateInfo = ''; }
+    }
+    
+    const messages = [
+      `Meu amor, cada momento ao teu lado é um capítulo perfeito da nossa história.${dateInfo} Obrigado por fazeres dos meus dias os mais felizes. És a razão do meu sorriso todos os dias.`,
+      `Nunca imaginei que o amor pudesse ser tão bonito até te conhecer.${dateInfo} Cada dia contigo é um presente que eu guardo no coração. Amo-te mais do que as palavras podem dizer.`,
+      `O nosso amor é como uma estrela que nunca se apaga.${dateInfo} És a melhor parte de mim, a razão pela qual acordo todos os dias com um sorriso. Para sempre, meu amor.`,
+      `Quando penso em nós, lembro-me de como a vida se tornou mais colorida desde que chegaste.${dateInfo} Prometo amar-te em todas as luas, em todas as estações, em todas as vidas.`,
+      `Teu amor transformou-me de uma forma que nunca julguei possível.${dateInfo} Sou mais feliz, mais forte e mais completo porque tu existes na minha vida.`,
+      `Cada batida do meu coração sussurra o teu nome.${dateInfo} És o sonho que nunca quero acordar, a certeza num mundo de incertezas.`
+    ];
+    
+    let randomMsg = messages[Math.floor(Math.random() * messages.length)];
+    randomMsg = randomMsg.replace(/meu amor/g, receiver);
+    randomMsg = randomMsg.replace(/quem te ama/g, sender);
+    
+    document.getElementById('message').value = randomMsg;
+    btn.classList.remove('loading');
+    btn.innerHTML = '<span class="ai-sparkle">✨</span> Gerar nova mensagem';
+    showToast('✨ Mensagem gerada com carinho!');
+  }, 800);
+}
+
+// ===== PESQUISA MÚSICA =====
+let searchTimeout;
+function onSearchTyping() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    const q = document.getElementById('music-search').value.trim();
+    if(q.length > 2) searchMusic();
+  }, 500);
+}
+
+async function searchMusic() {
+  const q = document.getElementById('music-search').value.trim();
+  if(!q){showToast('Escreve o nome de uma música ou artista');return}
+  const resultsDiv = document.getElementById('music-results');
+  resultsDiv.style.display = 'block';
+  resultsDiv.innerHTML = '<div style="padding:1.2rem;text-align:center;color:#9a7e84;font-size:.85rem">🔍 A pesquisar...</div>';
+  try {
+    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&limit=8&country=pt`);
+    const data = await res.json();
+    if(!data.results.length){resultsDiv.innerHTML='<div style="padding:1.2rem;text-align:center;color:#9a7e84;font-size:.85rem">😔 Nenhum resultado. Tenta outro termo.</div>';return}
+    
+    resultsDiv.innerHTML = data.results.map((t,idx) => `
+      <div class="music-result-item" id="mitem-${idx}" onclick="selectMusic(${idx},'${escapeString(t.trackName)}','${escapeString(t.artistName)}','${t.artworkUrl100 || ''}','${t.previewUrl || ''}')">
+        <img class="music-thumb" src="${t.artworkUrl100 || 'https://via.placeholder.com/44'}" alt="">
+        <div class="music-info">
+          <div class="music-name">${escapeHtml(t.trackName)}</div>
+          <div class="music-artist">${escapeHtml(t.artistName)}</div>
+        </div>
+        <button class="music-play-btn" onclick="previewTrack(event,'${t.previewUrl || ''}')" title="Pré-ouvir">▶</button>
+      </div>
+    `).join('');
+  } catch(e) {
+    resultsDiv.innerHTML='<div style="padding:1.2rem;text-align:center;color:#9a7e84;font-size:.85rem">❌ Erro na pesquisa. Tenta novamente.</div>';
+    console.error(e);
+  }
+}
+
+function escapeString(str) {
+  return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+function escapeHtml(str) {
+  if(!str) return '';
+  return str.replace(/[&<>]/g, function(m) {
+    if(m === '&') return '&amp;';
+    if(m === '<') return '&lt;';
+    if(m === '>') return '&gt;';
+    return m;
+  });
+}
+
+let previewAudio = null;
+function previewTrack(e, url) {
+  e.stopPropagation();
+  if(!url || url === ''){showToast('🎵 Pré-visualização não disponível para esta música');return}
+  if(previewAudio){previewAudio.pause();previewAudio=null}
+  previewAudio = new Audio(url);
+  previewAudio.volume = 0.5;
+  previewAudio.play().catch(()=>showToast('Não foi possível reproduzir a prévia'));
+  setTimeout(()=>{if(previewAudio){previewAudio.pause();previewAudio=null}},30000);
+}
+
+function selectMusic(idx, name, artist, thumb, previewUrl) {
+  if(previewAudio){previewAudio.pause();previewAudio=null}
+  document.querySelectorAll('.music-result-item').forEach(el=>el.classList.remove('selected'));
+  const selectedItem = document.getElementById('mitem-'+idx);
+  if(selectedItem) selectedItem.classList.add('selected');
+  
+  state.music = { name: name, artist: artist, thumb: thumb, preview: previewUrl };
+  
+  const d = document.getElementById('selected-music-display');
+  d.style.display = 'flex';
+  d.innerHTML = `
+    <img class="music-thumb" src="${thumb || 'https://via.placeholder.com/50'}" alt="" style="width:50px;height:50px;border-radius:8px">
+    <div class="music-info">
+      <div class="selected-tag">✓ Música selecionada</div>
+      <div class="music-name" style="font-size:.9rem">${escapeHtml(name)}</div>
+      <div class="music-artist">${escapeHtml(artist)}</div>
+    </div>
+    <button onclick="clearSelectedMusic()" style="background:none;border:none;cursor:pointer;color:var(--rose);font-size:1.2rem">✕</button>
+  `;
+  document.getElementById('music-results').style.display = 'none';
+  showToast('🎵 Música selecionada!');
+}
+
+function clearSelectedMusic() {
+  state.music = null;
+  document.getElementById('selected-music-display').style.display = 'none';
+  showToast('Música removida');
+}
+
+// ===== CONCLUIR =====
+async function conclude() {
+  if(state.photos.length===0){showToast('📸 Adiciona pelo menos 1 foto');return}
+  const msg = document.getElementById('message').value.trim();
+  if(!msg){showToast('💌 Escreve uma mensagem para ela');return}
+  state.message = msg;
+  showLoading('✨ A criar o vosso presente mágico...');
+  
+  const id = 'gift_'+Date.now()+'_'+Math.random().toString(36).slice(2,10);
+  state.giftId = id;
+  
+  const giftData = {
+    sender: state.sender, receiver: state.receiver,
+    startDate: state.startDate, message: state.message,
+    music: state.music, photos: state.photos,
+    created: new Date().toISOString()
+  };
+  
+  try {
+    localStorage.setItem(id, JSON.stringify(giftData));
+  } catch(e){
+    hideLoading();
+    showToast('As fotos são muito grandes. Tenta com menos ou fotos mais pequenas.');
+    return;
+  }
+  
+  await sleep(1000);
+  hideLoading();
+  buildSharePage();
+  goToPage(4);
+}
+
+function buildSharePage() {
+  const url = `${window.location.href.split('?')[0]}?gift=${state.giftId}`;
+  document.getElementById('receiver-display').textContent = state.receiver;
+  document.getElementById('gift-link-display').textContent = url;
+  window._giftUrl = url;
+  
+  const canvas = document.getElementById('qr-canvas');
+  canvas.innerHTML = '';
+  try {
+    new QRCode(canvas, {text:url,width:160,height:160,colorDark:'#1a1015',colorLight:'#fdf8f0',correctLevel:QRCode.CorrectLevel.M});
+  } catch(e){console.error(e);}
+}
+
+function copyLink() {
+  if(window._giftUrl){
+    navigator.clipboard.writeText(window._giftUrl).then(()=>showToast('📋 Link copiado!'));
+  }
+}
+
+function previewGift() {
+  if(state.giftId){
+    loadAndShowGift(state.giftId);
+    goToPage(5);
+  }
+}
+
+// ===== CARREGAR PRESENTE (via URL ou preview) =====
+function loadAndShowGift(id) {
+  let data;
+  try { 
+    data = JSON.parse(localStorage.getItem(id)); 
+  } catch(e){}
+  if(!data) { 
+    showToast('Presente não encontrado'); 
+    return false; 
+  }
+  
+  document.getElementById('p5-sender').textContent = 'De ' + data.sender;
+  document.getElementById('p5-title').innerHTML = data.receiver + ', tens um <em>presente</em>';
+  document.getElementById('p5-sub').textContent = data.sender + ' preparou algo especial para ti com muito amor. Clica para abrir a surpresa. 💕';
+  
+  window._giftData = data;
+  window._currentGiftId = id;
+  
+  // Limpar pétalas anteriores se existirem
+  const oldPetals = document.getElementById('petals5');
+  if(oldPetals) oldPetals.innerHTML = '';
+  createPetals('petals5');
+  buildFloatingHearts();
+  return true;
+}
+
+function buildFloatingHearts() {
+  const c = document.getElementById('floating-hearts');
+  c.innerHTML = '';
+  const hearts = ['💕','🌹','✨','💖','🌸','💗','💝','💓'];
+  for(let i=0;i<16;i++){
+    const el=document.createElement('div');
+    el.className='fheart';
+    el.textContent=hearts[Math.floor(Math.random()*hearts.length)];
+    el.style.cssText=`left:${Math.random()*90+5}%;bottom:${Math.random()*30}%;animation-delay:${Math.random()*4}s;animation-duration:${3+Math.random()*3}s`;
+    c.appendChild(el);
+  }
+}
+
+function openGift() {
+  const data = window._giftData;
+  if(!data) return;
+  
+  document.getElementById('g-greeting').textContent = 'Uma mensagem especial de ' + data.sender;
+  document.getElementById('g-title').innerHTML = data.receiver + ', isto é para <em>ti</em>';
+  document.getElementById('g-message').textContent = data.message;
+  
+  const grid = document.getElementById('g-photos');
+  grid.innerHTML = '';
+  data.photos.forEach((p,i) => {
+    const div=document.createElement('div');
+    div.className='photo-item fade-up';
+    div.style.animationDelay=(i*.05)+'s';
+    div.innerHTML=`<img src="${p.url}" alt="Momento especial" loading="lazy" onclick='openLightbox("${p.url.replace(/'/g, "\\'")}")'>`;
+    grid.appendChild(div);
+  });
+  
+  if(data.music && data.music.preview && data.music.preview !== '') {
+    const bar=document.getElementById('player-bar');
+    bar.style.display='flex';
+    document.getElementById('player-thumb').src=data.music.thumb || 'https://via.placeholder.com/44';
+    document.getElementById('player-track').textContent=data.music.name || 'Música';
+    document.getElementById('player-artist').textContent=data.music.artist || 'Artista';
+    
+    if(window._audio){
+      window._audio.pause();
+      window._audio = null;
+    }
+    window._audio = new Audio(data.music.preview);
+    window._audio.loop = true;
+    window._audio.volume = 0.4;
+    window._audio.play().catch(e => console.log('Auto-play bloqueado'));
+  }
+  
+  goToPage(6);
+}
+
+// ===== AUDIO CONTROLS =====
+function togglePlay() {
+  if(!window._audio) return;
+  if(window._audio.paused){
+    window._audio.play();
+    document.getElementById('play-pause-btn').textContent = '⏸';
+  } else {
+    window._audio.pause();
+    document.getElementById('play-pause-btn').textContent = '▶';
+  }
+}
+
+function toggleMute() {
+  if(!window._audio) return;
+  window._audio.muted = !window._audio.muted;
+  const btn = document.querySelector('.volume-btn');
+  if(btn) btn.textContent = window._audio.muted ? '🔇' : '🔊';
+}
+
+// ===== LIGHTBOX =====
+function openLightbox(url) {
+  document.getElementById('lightbox-img').src = url;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {document.getElementById('lightbox').classList.remove('open')}
+document.getElementById('lightbox').onclick = function(e){if(e.target===this)closeLightbox()}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ===== LOADING =====
+function showLoading(msg=''){
+  document.getElementById('loading-text').textContent=msg||'A carregar...';
+  document.getElementById('loading').classList.add('active');
+}
+function hideLoading(){document.getElementById('loading').classList.remove('active')}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+
+// ===== INIT — checar URL params =====
+(function init(){
+  const params = new URLSearchParams(window.location.search);
+  const giftId = params.get('gift');
+  if(giftId && localStorage.getItem(giftId)) {
+    if(loadAndShowGift(giftId)){
+      goToPage(5);
+    } else {
+      goToPage(1);
+    }
+  }
+})();
+</script>
+</body>
+</html>
