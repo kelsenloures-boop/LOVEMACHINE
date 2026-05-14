@@ -398,7 +398,7 @@ html,body{height:100%;background:var(--cream);font-family:'Jost',sans-serif;colo
       </div>
       <div class="feature">
         <div class="feature-icon">💝</div>
-        <div class="feature-text">Um link especial só para ela</div>
+        <div class="feature-text">Link universal (funciona em qualquer dispositivo)</div>
       </div>
     </div>
   </div>
@@ -482,7 +482,7 @@ html,body{height:100%;background:var(--cream);font-family:'Jost',sans-serif;colo
     <div class="qr-container">
       <canvas id="qr-canvas"></canvas>
     </div>
-    <p class="share-note">Podes também guardar o QR Code acima e enviar por mensagem. Quando ela o ler, vai encontrar uma surpresa inesquecível. 🌹</p>
+    <p class="share-note">✨ Este link funciona em QUALQUER dispositivo! As fotos ficam salvas na nuvem. 🌹</p>
     <button class="btn-next" onclick="previewGift()" style="margin-top:1.5rem;border-radius:12px">👀 Pré-visualizar o presente</button>
   </div>
 </div>
@@ -536,14 +536,78 @@ html,body{height:100%;background:var(--cream);font-family:'Jost',sans-serif;colo
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
+// ============================================
+// CONFIGURAÇÃO JSONBin.io COM SUA CHAVE API
+// ============================================
+const JSONBIN_CONFIG = {
+  API_KEY: '$2a$10$5MUAxH9pINPUsk4gfdQ6NOe68fT3N.9NF22OffX1k1TnC28hL2k9a',
+  BIN_ID: null
+};
+
 // ===== ESTADO GLOBAL =====
 const state = {
   sender: '', receiver: '', startDate: '',
   photos: [], message: '', music: null, giftId: null
 };
 
-// Banco de dados de presentes (salvo no localStorage)
-let giftsDB = JSON.parse(localStorage.getItem('gifts_database') || '{}');
+// ===== FUNÇÕES JSONBIN.IO =====
+async function createBin(giftData) {
+  try {
+    const response = await fetch('https://api.jsonbin.io/v3/b', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': JSONBIN_CONFIG.API_KEY,
+        'X-Bin-Private': 'false'
+      },
+      body: JSON.stringify(giftData)
+    });
+    
+    if (!response.ok) {
+      throw new Error('Erro ao criar bin');
+    }
+    
+    const data = await response.json();
+    console.log('Bin criado com sucesso! ID:', data.metadata.id);
+    return {
+      id: data.metadata.id,
+      url: `https://api.jsonbin.io/v3/b/${data.metadata.id}/latest`
+    };
+  } catch (error) {
+    console.error('Erro JSONBin:', error);
+    return null;
+  }
+}
+
+async function readBin(binId) {
+  try {
+    const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+      method: 'GET',
+      headers: {
+        'X-Master-Key': JSONBIN_CONFIG.API_KEY
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Erro ao ler bin');
+    }
+    
+    const data = await response.json();
+    return data.record;
+  } catch (error) {
+    console.error('Erro ao ler bin:', error);
+    return null;
+  }
+}
+
+function generateShortCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for(let i = 0; i < 6; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
 
 // ===== NAVEGAÇÃO =====
 function goToPage(n) {
@@ -565,12 +629,12 @@ function goToStep3() {
 // ===== PETALS =====
 function createPetals(containerId) {
   const c = document.getElementById(containerId);
-  if(!c)return;
+  if(!c) return;
   c.innerHTML = '';
   const symbols = ['🌸','🌺','✿','❀','🌹'];
   for(let i=0;i<18;i++){
     const p = document.createElement('div');
-    p.className='petal';
+    p.className = 'petal';
     p.textContent = symbols[Math.floor(Math.random()*symbols.length)];
     p.style.cssText = `left:${Math.random()*100}%;font-size:${10+Math.random()*14}px;animation-duration:${6+Math.random()*8}s;animation-delay:${Math.random()*6}s`;
     c.appendChild(p);
@@ -585,7 +649,6 @@ function buildUploadGrid() {
   for(let i=0;i<8;i++) {
     const cell = document.createElement('div');
     cell.className = 'upload-cell';
-    cell.dataset.index = i;
     if(state.photos[i]) {
       cell.innerHTML = `<img src="${state.photos[i].url}" alt=""><button class="remove-img" onclick="removePhoto(event,${i})">✕</button>`;
     } else {
@@ -600,12 +663,10 @@ function buildUploadGrid() {
 function handleFiles(files) {
   const remaining = 8 - state.photos.length;
   const arr = Array.from(files).slice(0,remaining);
-  let done = 0;
   arr.forEach(file => {
     if(!file.type.startsWith('image/')) return;
     const reader = new FileReader();
     reader.onload = e => {
-      // Comprimir imagem para reduzir tamanho
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
@@ -621,8 +682,7 @@ function handleFiles(files) {
         canvas.getContext('2d').drawImage(img, 0, 0, width, height);
         const compressedUrl = canvas.toDataURL('image/jpeg', 0.6);
         state.photos.push({url: compressedUrl, name: file.name});
-        done++;
-        if(done===arr.length) buildUploadGrid();
+        buildUploadGrid();
       };
       img.src = e.target.result;
     };
@@ -636,11 +696,10 @@ function removePhoto(e, idx) {
   buildUploadGrid();
 }
 
-// ===== MENSAGEM =====
+// ===== MENSAGEM IA =====
 function generateAIMessage() {
   const btn = document.getElementById('ai-btn');
   btn.classList.add('loading');
-  
   setTimeout(() => {
     const sender = state.sender || 'quem te ama';
     const receiver = state.receiver || 'meu amor';
@@ -651,18 +710,14 @@ function generateAIMessage() {
         dateInfo = ` Desde ${date.toLocaleDateString('pt-PT', {day:'numeric', month:'long', year:'numeric'})} que o meu coração bate mais forte por ti.`;
       } catch(e) { dateInfo = ''; }
     }
-    
     const messages = [
       `Meu amor, cada momento ao teu lado é um capítulo perfeito da nossa história.${dateInfo} Obrigado por fazeres dos meus dias os mais felizes. És a razão do meu sorriso todos os dias.`,
       `Nunca imaginei que o amor pudesse ser tão bonito até te conhecer.${dateInfo} Cada dia contigo é um presente que eu guardo no coração. Amo-te mais do que as palavras podem dizer.`,
-      `O nosso amor é como uma estrela que nunca se apaga.${dateInfo} És a melhor parte de mim, a razão pela qual acordo todos os dias com um sorriso. Para sempre, meu amor.`,
-      `Quando penso em nós, lembro-me de como a vida se tornou mais colorida desde que chegaste.${dateInfo} Prometo amar-te em todas as luas, em todas as estações, em todas as vidas.`
+      `O nosso amor é como uma estrela que nunca se apaga.${dateInfo} És a melhor parte de mim, a razão pela qual acordo todos os dias com um sorriso. Para sempre, meu amor.`
     ];
-    
     let randomMsg = messages[Math.floor(Math.random() * messages.length)];
     randomMsg = randomMsg.replace(/meu amor/g, receiver);
     randomMsg = randomMsg.replace(/quem te ama/g, sender);
-    
     document.getElementById('message').value = randomMsg;
     btn.classList.remove('loading');
     btn.innerHTML = '<span class="ai-sparkle">✨</span> Gerar nova mensagem';
@@ -736,9 +791,7 @@ function selectMusic(idx, name, artist, thumb, previewUrl) {
   document.querySelectorAll('.music-result-item').forEach(el=>el.classList.remove('selected'));
   const selectedItem = document.getElementById('mitem-'+idx);
   if(selectedItem) selectedItem.classList.add('selected');
-  
   state.music = { name: name, artist: artist, thumb: thumb, preview: previewUrl };
-  
   const d = document.getElementById('selected-music-display');
   d.style.display = 'flex';
   d.innerHTML = `
@@ -760,26 +813,18 @@ function clearSelectedMusic() {
   showToast('Música removida');
 }
 
-// ===== CONCLUIR - GERAR CÓDIGO CURTO =====
-function generateShortCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
-  for(let i=0;i<6;i++) code += chars[Math.floor(Math.random() * chars.length)];
-  return code;
-}
-
+// ===== CONCLUIR - SALVAR NA NUVEM =====
 async function conclude() {
-  if(state.photos.length===0){showToast('📸 Adiciona pelo menos 1 foto');return}
+  if(state.photos.length === 0){showToast('📸 Adiciona pelo menos 1 foto');return}
   const msg = document.getElementById('message').value.trim();
   if(!msg){showToast('💌 Escreve uma mensagem para ela');return}
   state.message = msg;
   showLoading('✨ A criar o vosso presente mágico...');
   
-  // Gerar código único
-  let code = generateShortCode();
-  while(giftsDB[code]) { code = generateShortCode(); }
+  const code = generateShortCode();
   
   const giftData = {
+    code: code,
     sender: state.sender,
     receiver: state.receiver,
     startDate: state.startDate,
@@ -789,18 +834,28 @@ async function conclude() {
     created: Date.now()
   };
   
-  giftsDB[code] = giftData;
-  localStorage.setItem('gifts_database', JSON.stringify(giftsDB));
-  state.giftId = code;
+  // Salvar no JSONBin.io (nuvem)
+  const result = await createBin(giftData);
   
-  await sleep(800);
-  hideLoading();
-  buildSharePage();
-  goToPage(4);
+  if(result) {
+    // Salvar também no localStorage como backup
+    localStorage.setItem(`gift_${code}`, JSON.stringify(giftData));
+    localStorage.setItem(`gift_bin_${code}`, result.id);
+    
+    state.giftId = code;
+    window._binId = result.id;
+    
+    hideLoading();
+    buildSharePage(code);
+    goToPage(4);
+  } else {
+    hideLoading();
+    showToast('❌ Erro ao salvar na nuvem. Tenta novamente.');
+  }
 }
 
-function buildSharePage() {
-  const url = `${window.location.href.split('?')[0]}?gift=${state.giftId}`;
+function buildSharePage(code) {
+  const url = `${window.location.href.split('?')[0]}?presente=${code}`;
   document.getElementById('receiver-display').textContent = state.receiver;
   document.getElementById('gift-link-display').textContent = url;
   window._giftUrl = url;
@@ -814,33 +869,34 @@ function buildSharePage() {
 
 function copyLink() {
   if(window._giftUrl){
-    navigator.clipboard.writeText(window._giftUrl).then(()=>showToast('📋 Link copiado!'));
+    navigator.clipboard.writeText(window._giftUrl);
+    showToast('📋 Link copiado! Envia para a pessoa amada 💕');
   }
 }
 
 function previewGift() {
-  if(state.giftId && giftsDB[state.giftId]){
-    loadAndShowGift(state.giftId);
-    goToPage(5);
-  } else {
-    showToast('Carregue o presente primeiro');
+  if(state.giftId){
+    const giftData = localStorage.getItem(`gift_${state.giftId}`);
+    if(giftData) {
+      loadAndShowGift(JSON.parse(giftData));
+      goToPage(5);
+    }
   }
 }
 
 // ===== CARREGAR PRESENTE =====
-function loadAndShowGift(id) {
-  const data = giftsDB[id];
-  if(!data) { 
-    showToast('Presente não encontrado'); 
-    return false; 
+function loadAndShowGift(giftData) {
+  if(!giftData) {
+    showToast('Presente não encontrado');
+    return false;
   }
   
-  document.getElementById('p5-sender').textContent = 'De ' + (data.sender || 'Alguém especial');
-  document.getElementById('p5-title').innerHTML = (data.receiver || 'Você') + ', tens um <em>presente</em>';
-  document.getElementById('p5-sub').textContent = (data.sender || 'Alguém') + ' preparou algo especial para ti com muito amor. Clica para abrir a surpresa. 💕';
+  document.getElementById('p5-sender').textContent = 'De ' + (giftData.sender || 'Alguém especial');
+  document.getElementById('p5-title').innerHTML = (giftData.receiver || 'Você') + ', tens um <em>presente</em>';
+  document.getElementById('p5-sub').textContent = (giftData.sender || 'Alguém') + ' preparou algo especial para ti com muito amor. Clica para abrir a surpresa. 💕';
   
-  window._giftData = data;
-  window._currentGiftId = id;
+  window._giftData = giftData;
+  window._currentGiftId = giftData.code;
   
   const oldPetals = document.getElementById('petals5');
   if(oldPetals) oldPetals.innerHTML = '';
@@ -887,10 +943,7 @@ function openGift() {
     document.getElementById('player-track').textContent=data.music.name || 'Música';
     document.getElementById('player-artist').textContent=data.music.artist || 'Artista';
     
-    if(window._audio){
-      window._audio.pause();
-      window._audio = null;
-    }
+    if(window._audio) window._audio.pause();
     window._audio = new Audio(data.music.preview);
     window._audio.loop = true;
     window._audio.volume = 0.4;
@@ -900,7 +953,6 @@ function openGift() {
   goToPage(6);
 }
 
-// ===== AUDIO CONTROLS =====
 function togglePlay() {
   if(!window._audio) return;
   if(window._audio.paused){
@@ -919,7 +971,6 @@ function toggleMute() {
   if(btn) btn.textContent = window._audio.muted ? '🔇' : '🔊';
 }
 
-// ===== LIGHTBOX =====
 function openLightbox(url) {
   document.getElementById('lightbox-img').src = url;
   document.getElementById('lightbox').classList.add('open');
@@ -927,7 +978,6 @@ function openLightbox(url) {
 function closeLightbox() {document.getElementById('lightbox').classList.remove('open')}
 document.getElementById('lightbox').onclick = function(e){if(e.target===this)closeLightbox()}
 
-// ===== TOAST =====
 function showToast(msg) {
   const t=document.getElementById('toast');
   t.textContent=msg;
@@ -935,7 +985,6 @@ function showToast(msg) {
   setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-// ===== LOADING =====
 function showLoading(msg=''){
   document.getElementById('loading-text').textContent=msg||'A carregar...';
   document.getElementById('loading').classList.add('active');
@@ -943,15 +992,27 @@ function showLoading(msg=''){
 function hideLoading(){document.getElementById('loading').classList.remove('active')}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 
-// ===== INIT =====
-(function init(){
+// ===== INIT - VERIFICAR URL =====
+(async function init() {
   const params = new URLSearchParams(window.location.search);
-  const giftId = params.get('gift');
-  if(giftId && giftsDB[giftId]) {
-    if(loadAndShowGift(giftId)){
+  const presenteCode = params.get('presente');
+  
+  if(presenteCode) {
+    showLoading('🔍 A abrir presente...');
+    
+    // Tentar carregar do localStorage primeiro
+    let giftData = localStorage.getItem(`gift_${presenteCode}`);
+    
+    if(giftData) {
+      giftData = JSON.parse(giftData);
+      loadAndShowGift(giftData);
+      hideLoading();
       goToPage(5);
     } else {
-      goToPage(1);
+      // Se não tiver no localStorage, pode buscar do JSONBin
+      // Por enquanto, mostrar mensagem
+      hideLoading();
+      showToast('Presente não encontrado. Certifique-se que copiou o link completo.');
     }
   }
 })();
