@@ -482,7 +482,7 @@ html,body{height:100%;background:var(--cream);font-family:'Jost',sans-serif;colo
     <div class="qr-container">
       <canvas id="qr-canvas"></canvas>
     </div>
-    <p class="share-note">✨ Este link funciona em QUALQUER dispositivo! As fotos ficam salvas na nuvem. 🌹</p>
+    <p class="share-note">✨ Este link funciona em QUALQUER dispositivo! Os dados ficam salvos na nuvem. 🌹</p>
     <button class="btn-next" onclick="previewGift()" style="margin-top:1.5rem;border-radius:12px">👀 Pré-visualizar o presente</button>
   </div>
 </div>
@@ -541,7 +541,7 @@ html,body{height:100%;background:var(--cream);font-family:'Jost',sans-serif;colo
 // ============================================
 const JSONBIN_CONFIG = {
   API_KEY: '$2a$10$5MUAxH9pINPUsk4gfdQ6NOe68fT3N.9NF22OffX1k1TnC28hL2k9a',
-  BIN_ID: null
+  MASTER_BIN_ID: null  // Vamos criar um bin principal para guardar o índice
 };
 
 // ===== ESTADO GLOBAL =====
@@ -550,8 +550,77 @@ const state = {
   photos: [], message: '', music: null, giftId: null
 };
 
+// Banco de índices (mapeamento código -> binId)
+let giftIndex = {};
+
 // ===== FUNÇÕES JSONBIN.IO =====
-async function createBin(giftData) {
+
+// Carregar o índice de presentes
+async function loadIndex() {
+  try {
+    // Tentar carregar um bin existente que guarda o índice
+    const savedIndex = localStorage.getItem('gift_index_master');
+    if(savedIndex) {
+      giftIndex = JSON.parse(savedIndex);
+    }
+    
+    // Também tentar buscar da nuvem se tiver um ID salvo
+    const masterId = localStorage.getItem('master_bin_id');
+    if(masterId) {
+      const response = await fetch(`https://api.jsonbin.io/v3/b/${masterId}/latest`, {
+        headers: { 'X-Master-Key': JSONBIN_CONFIG.API_KEY }
+      });
+      if(response.ok) {
+        const data = await response.json();
+        giftIndex = data.record;
+        localStorage.setItem('gift_index_master', JSON.stringify(giftIndex));
+      }
+    }
+  } catch(e) {
+    console.log('Erro ao carregar índice:', e);
+  }
+}
+
+// Salvar o índice na nuvem
+async function saveIndex() {
+  try {
+    localStorage.setItem('gift_index_master', JSON.stringify(giftIndex));
+    
+    let masterId = localStorage.getItem('master_bin_id');
+    
+    if(masterId) {
+      // Atualizar bin existente
+      await fetch(`https://api.jsonbin.io/v3/b/${masterId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': JSONBIN_CONFIG.API_KEY
+        },
+        body: JSON.stringify(giftIndex)
+      });
+    } else {
+      // Criar novo bin
+      const response = await fetch('https://api.jsonbin.io/v3/b', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': JSONBIN_CONFIG.API_KEY,
+          'X-Bin-Private': 'false'
+        },
+        body: JSON.stringify(giftIndex)
+      });
+      if(response.ok) {
+        const data = await response.json();
+        localStorage.setItem('master_bin_id', data.metadata.id);
+      }
+    }
+  } catch(e) {
+    console.log('Erro ao salvar índice:', e);
+  }
+}
+
+// Criar um presente na nuvem
+async function createGiftInCloud(code, giftData) {
   try {
     const response = await fetch('https://api.jsonbin.io/v3/b', {
       method: 'POST',
@@ -563,39 +632,49 @@ async function createBin(giftData) {
       body: JSON.stringify(giftData)
     });
     
-    if (!response.ok) {
-      throw new Error('Erro ao criar bin');
-    }
+    if (!response.ok) throw new Error('Erro ao criar bin');
     
     const data = await response.json();
-    console.log('Bin criado com sucesso! ID:', data.metadata.id);
-    return {
-      id: data.metadata.id,
-      url: `https://api.jsonbin.io/v3/b/${data.metadata.id}/latest`
-    };
+    const binId = data.metadata.id;
+    
+    // Salvar no índice
+    giftIndex[code] = binId;
+    await saveIndex();
+    
+    return binId;
   } catch (error) {
-    console.error('Erro JSONBin:', error);
+    console.error('Erro ao criar presente na nuvem:', error);
     return null;
   }
 }
 
-async function readBin(binId) {
+// Buscar presente na nuvem
+async function getGiftFromCloud(code) {
   try {
+    // Primeiro, verificar se temos o binId para este código
+    let binId = giftIndex[code];
+    
+    // Se não tiver no índice, tentar carregar índice primeiro
+    if(!binId) {
+      await loadIndex();
+      binId = giftIndex[code];
+    }
+    
+    if(!binId) {
+      console.log('Código não encontrado no índice');
+      return null;
+    }
+    
     const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
-      method: 'GET',
-      headers: {
-        'X-Master-Key': JSONBIN_CONFIG.API_KEY
-      }
+      headers: { 'X-Master-Key': JSONBIN_CONFIG.API_KEY }
     });
     
-    if (!response.ok) {
-      throw new Error('Erro ao ler bin');
-    }
+    if (!response.ok) throw new Error('Erro ao ler bin');
     
     const data = await response.json();
     return data.record;
   } catch (error) {
-    console.error('Erro ao ler bin:', error);
+    console.error('Erro ao buscar presente:', error);
     return null;
   }
 }
@@ -834,23 +913,21 @@ async function conclude() {
     created: Date.now()
   };
   
-  // Salvar no JSONBin.io (nuvem)
-  const result = await createBin(giftData);
+  // Salvar na nuvem (JSONBin.io)
+  const binId = await createGiftInCloud(code, giftData);
   
-  if(result) {
-    // Salvar também no localStorage como backup
+  if(binId) {
+    // Salvar também no localStorage como backup rápido
     localStorage.setItem(`gift_${code}`, JSON.stringify(giftData));
-    localStorage.setItem(`gift_bin_${code}`, result.id);
     
     state.giftId = code;
-    window._binId = result.id;
-    
     hideLoading();
     buildSharePage(code);
     goToPage(4);
+    showToast('✨ Presente salvo na nuvem com sucesso!');
   } else {
     hideLoading();
-    showToast('❌ Erro ao salvar na nuvem. Tenta novamente.');
+    showToast('❌ Erro ao salvar. Tenta novamente.');
   }
 }
 
@@ -992,15 +1069,18 @@ function showLoading(msg=''){
 function hideLoading(){document.getElementById('loading').classList.remove('active')}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 
-// ===== INIT - VERIFICAR URL =====
+// ===== INIT - VERIFICAR URL E CARREGAR ÍNDICE =====
 (async function init() {
+  // Carregar índice de presentes
+  await loadIndex();
+  
   const params = new URLSearchParams(window.location.search);
   const presenteCode = params.get('presente');
   
   if(presenteCode) {
     showLoading('🔍 A abrir presente...');
     
-    // Tentar carregar do localStorage primeiro
+    // Tentar carregar do localStorage primeiro (mais rápido)
     let giftData = localStorage.getItem(`gift_${presenteCode}`);
     
     if(giftData) {
@@ -1009,10 +1089,19 @@ function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
       hideLoading();
       goToPage(5);
     } else {
-      // Se não tiver no localStorage, pode buscar do JSONBin
-      // Por enquanto, mostrar mensagem
-      hideLoading();
-      showToast('Presente não encontrado. Certifique-se que copiou o link completo.');
+      // Buscar da nuvem
+      const cloudGift = await getGiftFromCloud(presenteCode);
+      if(cloudGift) {
+        // Salvar no localStorage para próximas vezes
+        localStorage.setItem(`gift_${presenteCode}`, JSON.stringify(cloudGift));
+        loadAndShowGift(cloudGift);
+        hideLoading();
+        goToPage(5);
+      } else {
+        hideLoading();
+        showToast('🔐 Presente não encontrado. Verifique o código ou crie um novo presente.');
+        goToPage(1);
+      }
     }
   }
 })();
