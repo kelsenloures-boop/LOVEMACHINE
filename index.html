@@ -537,12 +537,9 @@ html,body{height:100%;background:var(--cream);font-family:'Jost',sans-serif;colo
 
 <script>
 // ============================================
-// CONFIGURAÇÃO JSONBin.io COM SUA CHAVE API
+// CONFIGURAÇÃO JSONBin.io
 // ============================================
-const JSONBIN_CONFIG = {
-  API_KEY: '$2a$10$5MUAxH9pINPUsk4gfdQ6NOe68fT3N.9NF22OffX1k1TnC28hL2k9a',
-  MASTER_BIN_ID: null  // Vamos criar um bin principal para guardar o índice
-};
+const JSONBIN_API_KEY = '$2a$10$5MUAxH9pINPUsk4gfdQ6NOe68fT3N.9NF22OffX1k1TnC28hL2k9a';
 
 // ===== ESTADO GLOBAL =====
 const state = {
@@ -550,124 +547,49 @@ const state = {
   photos: [], message: '', music: null, giftId: null
 };
 
-// Banco de índices (mapeamento código -> binId)
-let giftIndex = {};
-
 // ===== FUNÇÕES JSONBIN.IO =====
+// A lógica foi corrigida: o URL agora contém o binId DIRECTAMENTE.
+// Não há índice intermediário — elimina o problema de cross-device.
 
-// Carregar o índice de presentes
-async function loadIndex() {
-  try {
-    // Tentar carregar um bin existente que guarda o índice
-    const savedIndex = localStorage.getItem('gift_index_master');
-    if(savedIndex) {
-      giftIndex = JSON.parse(savedIndex);
-    }
-    
-    // Também tentar buscar da nuvem se tiver um ID salvo
-    const masterId = localStorage.getItem('master_bin_id');
-    if(masterId) {
-      const response = await fetch(`https://api.jsonbin.io/v3/b/${masterId}/latest`, {
-        headers: { 'X-Master-Key': JSONBIN_CONFIG.API_KEY }
-      });
-      if(response.ok) {
-        const data = await response.json();
-        giftIndex = data.record;
-        localStorage.setItem('gift_index_master', JSON.stringify(giftIndex));
-      }
-    }
-  } catch(e) {
-    console.log('Erro ao carregar índice:', e);
-  }
-}
-
-// Salvar o índice na nuvem
-async function saveIndex() {
-  try {
-    localStorage.setItem('gift_index_master', JSON.stringify(giftIndex));
-    
-    let masterId = localStorage.getItem('master_bin_id');
-    
-    if(masterId) {
-      // Atualizar bin existente
-      await fetch(`https://api.jsonbin.io/v3/b/${masterId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Master-Key': JSONBIN_CONFIG.API_KEY
-        },
-        body: JSON.stringify(giftIndex)
-      });
-    } else {
-      // Criar novo bin
-      const response = await fetch('https://api.jsonbin.io/v3/b', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Master-Key': JSONBIN_CONFIG.API_KEY,
-          'X-Bin-Private': 'false'
-        },
-        body: JSON.stringify(giftIndex)
-      });
-      if(response.ok) {
-        const data = await response.json();
-        localStorage.setItem('master_bin_id', data.metadata.id);
-      }
-    }
-  } catch(e) {
-    console.log('Erro ao salvar índice:', e);
-  }
-}
-
-// Criar um presente na nuvem
-async function createGiftInCloud(code, giftData) {
+// Criar um presente na nuvem e retornar o binId
+async function createGiftInCloud(giftData) {
   try {
     const response = await fetch('https://api.jsonbin.io/v3/b', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Master-Key': JSONBIN_CONFIG.API_KEY,
-        'X-Bin-Private': 'false'
+        'X-Master-Key': JSONBIN_API_KEY,
+        'X-Bin-Private': 'false',
+        'X-Bin-Name': 'presente-' + giftData.receiver
       },
       body: JSON.stringify(giftData)
     });
-
-    if (!response.ok) throw new Error('Erro ao criar bin');
-
+    if (!response.ok) {
+      const err = await response.text();
+      console.error('JSONBin erro:', err);
+      return null;
+    }
     const data = await response.json();
-
-    // Guardar o binId diretamente no presente
-    return data.metadata.id;
+    return data.metadata.id; // Este é o ID único que vai no URL
   } catch (error) {
-    console.error('Erro ao criar presente na nuvem:', error);
+    console.error('Erro ao criar presente:', error);
     return null;
   }
 }
 
-// Buscar presente na nuvem
+// Buscar presente na nuvem pelo binId (que está no URL)
 async function getGiftFromCloud(binId) {
   try {
     const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
-      headers: { 'X-Master-Key': JSONBIN_CONFIG.API_KEY }
+      headers: { 'X-Master-Key': JSONBIN_API_KEY }
     });
-
-    if (!response.ok) throw new Error('Erro ao ler bin');
-
+    if (!response.ok) throw new Error('Bin não encontrado');
     const data = await response.json();
     return data.record;
   } catch (error) {
     console.error('Erro ao buscar presente:', error);
     return null;
   }
-}
-
-function generateShortCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
-  for(let i = 0; i < 6; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return code;
 }
 
 // ===== NAVEGAÇÃO =====
@@ -882,10 +804,7 @@ async function conclude() {
   state.message = msg;
   showLoading('✨ A criar o vosso presente mágico...');
   
-  const code = generateShortCode();
-  
   const giftData = {
-    code: code,
     sender: state.sender,
     receiver: state.receiver,
     startDate: state.startDate,
@@ -895,26 +814,27 @@ async function conclude() {
     created: Date.now()
   };
   
-  // Salvar na nuvem (JSONBin.io)
-  const binId = await createGiftInCloud(code, giftData);
+  // Salvar na nuvem — o binId retornado vai directamente no URL
+  const binId = await createGiftInCloud(giftData);
   
   if(binId) {
-    // Salvar também no localStorage como backup rápido
-    localStorage.setItem(`gift_${code}`, JSON.stringify(giftData));
-    
-    state.giftId = code;
+    // Cache local opcional (acelera abertura no mesmo dispositivo)
+    try { localStorage.setItem(`gift_${binId}`, JSON.stringify(giftData)); } catch(e){}
+    state.giftId = binId;
     hideLoading();
-    buildSharePage(code);
+    buildSharePage(binId);
     goToPage(4);
     showToast('✨ Presente salvo na nuvem com sucesso!');
   } else {
     hideLoading();
-    showToast('❌ Erro ao salvar. Tenta novamente.');
+    showToast('❌ Erro ao salvar. Verifica a tua ligação e tenta novamente.');
   }
 }
 
-function buildSharePage(code) {
-  const url = `${window.location.href.split('?')[0]}?presente=${code}`;
+function buildSharePage(binId) {
+  // O URL contém o binId directamente — funciona em qualquer dispositivo
+  const base = window.location.href.split('?')[0];
+  const url = `${base}?presente=${binId}`;
   document.getElementById('receiver-display').textContent = state.receiver;
   document.getElementById('gift-link-display').textContent = url;
   window._giftUrl = url;
@@ -928,17 +848,36 @@ function buildSharePage(code) {
 
 function copyLink() {
   if(window._giftUrl){
-    navigator.clipboard.writeText(window._giftUrl);
-    showToast('📋 Link copiado! Envia para a pessoa amada 💕');
+    navigator.clipboard.writeText(window._giftUrl).then(()=>{
+      showToast('📋 Link copiado! Envia para a pessoa amada 💕');
+    }).catch(()=>{
+      // Fallback para browsers mais antigos
+      const el = document.createElement('textarea');
+      el.value = window._giftUrl;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      showToast('📋 Link copiado! 💕');
+    });
   }
 }
 
 function previewGift() {
   if(state.giftId){
-    const giftData = localStorage.getItem(`gift_${state.giftId}`);
-    if(giftData) {
-      loadAndShowGift(JSON.parse(giftData));
+    // Tentar cache local primeiro, senão busca da nuvem
+    let cached = null;
+    try { cached = localStorage.getItem(`gift_${state.giftId}`); } catch(e){}
+    if(cached) {
+      loadAndShowGift(JSON.parse(cached));
       goToPage(5);
+    } else {
+      showLoading('A carregar pré-visualização...');
+      getGiftFromCloud(state.giftId).then(data => {
+        hideLoading();
+        if(data){ loadAndShowGift(data); goToPage(5); }
+        else showToast('Erro ao carregar pré-visualização');
+      });
     }
   }
 }
@@ -1051,39 +990,38 @@ function showLoading(msg=''){
 function hideLoading(){document.getElementById('loading').classList.remove('active')}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 
-// ===== INIT - VERIFICAR URL E CARREGAR ÍNDICE =====
+// ===== INIT - VERIFICAR URL E ABRIR PRESENTE =====
 (async function init() {
-  // Carregar índice de presentes
-  await loadIndex();
-  
   const params = new URLSearchParams(window.location.search);
-  const presenteCode = params.get('presente') || params.get('gift');
+  const binId = params.get('presente');
   
-  if(presenteCode) {
-    showLoading('🔍 A abrir presente...');
+  if(binId) {
+    showLoading('🔍 A abrir o teu presente...');
     
-    // Tentar carregar do localStorage primeiro (mais rápido)
-    let giftData = localStorage.getItem(`gift_${presenteCode}`);
+    // 1. Tentar cache local (rápido, mesmo dispositivo)
+    let giftData = null;
+    try {
+      const cached = localStorage.getItem(`gift_${binId}`);
+      if(cached) giftData = JSON.parse(cached);
+    } catch(e){}
+    
+    // 2. Se não há cache, buscar directamente da JSONBin pelo binId
+    if(!giftData) {
+      giftData = await getGiftFromCloud(binId);
+      // Guardar cache para próximas visitas
+      if(giftData) {
+        try { localStorage.setItem(`gift_${binId}`, JSON.stringify(giftData)); } catch(e){}
+      }
+    }
     
     if(giftData) {
-      giftData = JSON.parse(giftData);
       loadAndShowGift(giftData);
       hideLoading();
       goToPage(5);
     } else {
-      // Buscar da nuvem
-      const cloudGift = await getGiftFromCloud(presenteCode);
-      if(cloudGift) {
-        // Salvar no localStorage para próximas vezes
-        localStorage.setItem(`gift_${presenteCode}`, JSON.stringify(cloudGift));
-        loadAndShowGift(cloudGift);
-        hideLoading();
-        goToPage(5);
-      } else {
-        hideLoading();
-        showToast('🔐 Presente não encontrado. Verifique o código ou crie um novo presente.');
-        goToPage(1);
-      }
+      hideLoading();
+      showToast('💔 Presente não encontrado. O link pode estar incorreto.');
+      goToPage(1);
     }
   }
 })();
